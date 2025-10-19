@@ -161,6 +161,16 @@ async function handleDayClick(date) {
             [selectionStart, selectionEnd] = [selectionEnd, selectionStart];
         }
 
+        // Delete any ranges fully within the new selection
+        const rangesToDelete = dateRanges.filter(range => {
+            const rangeStart = new Date(range.start);
+            const rangeEnd = new Date(range.end);
+            return rangeStart >= selectionStart && rangeEnd <= selectionEnd;
+        });
+        for (const range of rangesToDelete) {
+            await db.deleteDateRange(range.id);
+        }
+
         await db.saveDateRange(selectionStart, selectionEnd);
         dateRanges = (await db.loadDateRanges()).map(range => ({
             ...range,
