@@ -84,7 +84,7 @@ body {
     padding: 7px;
     border-radius: 50%;
     box-sizing: border-box;
-    color: #667eea;
+    color: #5d5d5d;
 }
 
 .calendar-day:hover {
@@ -95,7 +95,9 @@ body {
 .calendar-day.selected {
     border: 1px solid #0025cc;
     transform: scale(0.9);
-    background: #b3c1ff;
+    background: white;
+    opacity: 0.7;
+
 }
 
 .calendar-day.in-range {
@@ -104,6 +106,19 @@ body {
     border: 1px solid #0025cc;
     font-weight: bold;
 }
+
+.calendar-days-in-window {
+    font-size: 0.7em;
+    margin-top: 2px;
+    opacity: 0.7;
+}
+
+
+.schengen-over {
+    background-color: #e74c3c !important;
+    color: #fff;
+}
+
 
 .calendar-day.today {
     position: relative;
@@ -209,15 +224,4 @@ body {
     filter: brightness(0.95) drop-shadow(0 2px 8px #667eea33);
     transform: scale(0.9);
 
-}
-
-.calendar-days-in-window {
-    font-size: 0.7em;
-    color: #bbb;
-    margin-top: 2px;
-}
-
-.schengen-over {
-    background-color: #e74c3c !important;
-    color: #fff;
 }

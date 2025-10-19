@@ -98,7 +98,7 @@ function renderCalendar() {
 
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
-            addDayElement(monthGrid, date, false);
+            addDayElement(monthGrid, date);
         }
 
         monthContainer.appendChild(monthGrid);
@@ -118,7 +118,7 @@ function renderCalendar() {
     }
 }
 
-function addDayElement(calendar, date, isOtherMonth) {
+function addDayElement(calendar, date) {
 
     const dayElement = document.createElement('div');
     dayElement.className = 'calendar-day';
