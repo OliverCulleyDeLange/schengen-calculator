@@ -46,6 +46,7 @@ Built with pure HTML, CSS, and JavaScript - no frameworks or dependencies requir
 - **Storage**: Uses IndexedDB for persistent local storage
 - **Calculation**: Implements proper rolling 180-day window logic
 - **Browser Support**: Works in all modern browsers with IndexedDB support
+- **Analytics**: Privacy-friendly GoatCounter analytics for tracking app usage
 
 ## License
 
