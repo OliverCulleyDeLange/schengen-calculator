@@ -19,6 +19,70 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function setupEventListeners() {
+    // Export button logic
+    const exportBtn = document.getElementById('exportBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const exportData = dateRanges.map(r => ({
+                ...r,
+                start: r.start instanceof Date ? r.start.toISOString() : r.start,
+                end: r.end instanceof Date ? r.end.toISOString() : r.end
+            }));
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'schengen.json';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+        });
+    }
+
+    // Import button logic
+    const importBtn = document.getElementById('importBtn');
+    if (importBtn) {
+        importBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.style.display = 'none';
+            input.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                try {
+                    const text = await file.text();
+                    const imported = JSON.parse(text);
+                    if (!Array.isArray(imported)) throw new Error('Invalid file format');
+                    // Clear existing ranges
+                    await db.clearAllRanges();
+                    // Save imported ranges
+                    for (const r of imported) {
+                        const start = new Date(r.start);
+                        const end = new Date(r.end);
+                        await db.saveDateRange(start, end);
+                    }
+                    dateRanges = (await db.loadDateRanges()).map(range => ({
+                        ...range,
+                        start: new Date(range.start),
+                        end: new Date(range.end)
+                    }));
+                    renderCalendar();
+                    alert('Dates imported successfully!');
+                } catch (err) {
+                    alert('Failed to import: ' + err.message);
+                }
+            });
+            document.body.appendChild(input);
+            input.click();
+            setTimeout(() => document.body.removeChild(input), 1000);
+        });
+    }
     const resetBtn = document.getElementById('resetBtn');
     if (resetBtn) {
         resetBtn.addEventListener('click', async (e) => {

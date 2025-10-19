@@ -1,13 +1,3 @@
-/* Privacy Policy Page Styles */
-.privacy-content {
-    background: #fff;
-    color: #333;
-    border-radius: 12px;
-    box-shadow: 0 4px 24px #667eea33;
-    padding: 32px 24px;
-    max-width: 700px;
-    margin: 48px auto;
-}
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -149,7 +139,8 @@ body {
     z-index: 1000;
 }
 
-.reset-button, .info-button {
+
+.reset-button, .info-button, .export-button, .import-button {
     width: 48px;
     height: 48px;
     padding: 0;
@@ -161,6 +152,16 @@ body {
     display: block;
 }
 
+.export-button svg, .import-button svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.export-button:hover, .import-button:hover {
+    filter: brightness(0.95) drop-shadow(0 2px 8px #667eea33);
+    transform: scale(0.9);
+}
 .info-button svg {
     display: block;
     width: 100%;
@@ -224,4 +225,30 @@ body {
     filter: brightness(0.95) drop-shadow(0 2px 8px #667eea33);
     transform: scale(0.9);
 
+}
+
+/* Plain text button for info popover */
+.plain-text-btn {
+    background: none;
+    border: none;
+    color: #667eea;
+    font-size: 1em;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.15s;
+}
+.plain-text-btn:hover {
+    color: #3b489c;
+    text-decoration: underline;
+}
+
+/* Privacy Policy Page Styles */
+.privacy-content {
+    background: #fff;
+    color: #333;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px #667eea33;
+    padding: 32px 24px;
+    max-width: 700px;
+    margin: 48px auto;
 }
