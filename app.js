@@ -135,26 +135,6 @@ function setupEventListeners() {
             await clearAllRanges();
         }
     });
-    
-    document.getElementById('addRangeBtn').addEventListener('click', () => {
-        const startDate = prompt('Enter start date (YYYY-MM-DD):');
-        const endDate = prompt('Enter end date (YYYY-MM-DD):');
-        
-        if (startDate && endDate) {
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            
-            if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-                if (start <= end) {
-                    saveDateRange(start, end);
-                } else {
-                    alert('Start date must be before or equal to end date');
-                }
-            } else {
-                alert('Invalid date format. Please use YYYY-MM-DD');
-            }
-        }
-    });
 }
 
 // Calendar rendering
@@ -228,6 +208,11 @@ function addDayElement(calendar, date, isOtherMonth) {
     const inRange = isDateInAnyRange(date);
     if (inRange) {
         dayElement.classList.add('in-range');
+    }
+    
+    // Check if this is the currently selected start date (first click)
+    if (selectionStart && !selectionEnd && isSameDay(date, selectionStart)) {
+        dayElement.classList.add('selected');
     }
     
     // Check if selected (start or end of a range)
@@ -332,13 +317,8 @@ function checkExceedsLimit(date) {
 }
 
 function calculateStats() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // Calculate days in the last 180 days
-    const windowStart = new Date(today);
-    windowStart.setDate(windowStart.getDate() - 179);
-    
+    // Calculate total days across all ranges
+    // This gives users a simple count of all days in their planned trips
     let daysUsed = 0;
     
     dateRanges.forEach(range => {
@@ -347,13 +327,7 @@ function calculateStats() {
         rangeStart.setHours(0, 0, 0, 0);
         rangeEnd.setHours(0, 0, 0, 0);
         
-        // Find overlap with current 180-day window
-        const overlapStart = new Date(Math.max(rangeStart.getTime(), windowStart.getTime()));
-        const overlapEnd = new Date(Math.min(rangeEnd.getTime(), today.getTime()));
-        
-        if (overlapStart <= overlapEnd) {
-            daysUsed += getDaysBetween(overlapStart, overlapEnd);
-        }
+        daysUsed += getDaysBetween(rangeStart, rangeEnd);
     });
     
     return {
