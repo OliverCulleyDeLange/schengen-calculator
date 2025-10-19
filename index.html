@@ -1,24 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schengen Calculator</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
-    <button id="resetBtn" class="reset-triangle" title="Reset">
-        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="18" cy="18" r="16" stroke="#667eea" stroke-width="2" fill="#f0f0f0"/>
-            <path d="M24 12a8 8 0 1 0 2.34 5.66" stroke="#667eea" stroke-width="2" fill="none"/>
-            <polygon points="26,10 26,16 20,16" fill="#667eea"/>
-        </svg>
-    </button>
-
+    <div class="icon-buttons">
+        <button id="infoBtn" class="info-button" title="Info">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="16" stroke="#667eea" stroke-width="2" fill="#f0f0f0" />
+                <text x="18" y="23" text-anchor="middle" font-size="18" fill="#667eea" font-family="Arial"
+                    font-weight="bold">i</text>
+            </svg>
+        </button>
+        <div id="infoPopover" class="info-popover" style="display:none;">
+            <div class="info-content">
+                <h3>Schengen Days Calculator</h3>
+                <p>
+                    This tool helps you calculate your allowed stay in the Schengen area based on the 90/180 rule.
+                </p>
+                <p>
+                    Select your travel days, and you'll see how many days you've used in your 180 day window for each day.
+                </p>
+                <p>
+                    Days will be highlighted red if you overstay!
+                </p>
+                <button id="closeInfo" class="close-info">Close</button>
+            </div>
+        </div>
+        <button id="resetBtn" class="reset-button" title="Reset">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="16" stroke="#667eea" stroke-width="2" fill="#f0f0f0" />
+                <path d="M24 12a8 8 0 1 0 2.34 5.66" stroke="#667eea" stroke-width="2" fill="none" />
+                <polygon points="26,10 26,16 20,16" fill="#667eea" />
+            </svg>
+        </button>
+    </div>
     <div id="calendar"></div>
 
     <script type="module" src="app.js"></script>
     <script data-goatcounter="https://ocd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
+
 </html>

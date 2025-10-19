@@ -35,6 +35,31 @@ function setupEventListeners() {
         });
     }
 
+    // Info button popover logic
+    const infoBtn = document.getElementById('infoBtn');
+    const infoPopover = document.getElementById('infoPopover');
+    const closeInfo = document.getElementById('closeInfo');
+    if (infoBtn && infoPopover) {
+        infoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            infoPopover.style.display = 'block';
+        });
+    }
+    if (closeInfo && infoPopover) {
+        closeInfo.addEventListener('click', (e) => {
+            e.preventDefault();
+            infoPopover.style.display = 'none';
+        });
+    }
+    // Optional: close popover when clicking outside
+    document.addEventListener('mousedown', (e) => {
+        if (infoPopover && infoPopover.style.display === 'block') {
+            if (!infoPopover.contains(e.target) && e.target !== infoBtn) {
+                infoPopover.style.display = 'none';
+            }
+        }
+    });
+
 }
 
 function renderCalendar() {
