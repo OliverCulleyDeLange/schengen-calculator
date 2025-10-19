@@ -7,6 +7,7 @@ const STORE_NAME = 'dateRanges';
 let db = null;
 let dateRanges = [];
 let currentMonth = new Date();
+let calendarHasScrolled = false;
 let selectionStart = null;
 let selectionEnd = null;
 
@@ -131,34 +132,41 @@ function setupEventListeners() {
 function renderCalendar() {
     const calendar = document.getElementById('calendar');
     calendar.innerHTML = '';
-    
+
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                       'July', 'August', 'September', 'October', 'November', 'December'];
-    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
-    // Render 12 months: 6 months back, current month, and 5 months forward
+        'July', 'August', 'September', 'October', 'November', 'December'];
+    const dayHeaders = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    // Render 25 months: 12 months back, current month, and 12 months forward
     const today = new Date();
-    const startMonth = new Date(today.getFullYear(), today.getMonth() - 6, 1);
-    
-    for (let monthOffset = 0; monthOffset < 12; monthOffset++) {
+    const startMonth = new Date(today.getFullYear(), today.getMonth() - 12, 1);
+    let currentMonthIndex = null;
+
+    for (let monthOffset = 0; monthOffset < 25; monthOffset++) {
         const monthDate = new Date(startMonth.getFullYear(), startMonth.getMonth() + monthOffset, 1);
         const year = monthDate.getFullYear();
         const month = monthDate.getMonth();
-        
+
         // Create month container
         const monthContainer = document.createElement('div');
         monthContainer.className = 'month-container';
-        
+
         // Add month header
         const monthHeader = document.createElement('div');
         monthHeader.className = 'month-header';
         monthHeader.textContent = `${monthNames[month]} ${year}`;
         monthContainer.appendChild(monthHeader);
-        
+
+        // Mark the current month container for scrolling
+        if (year === today.getFullYear() && month === today.getMonth()) {
+            currentMonthIndex = monthOffset;
+            monthContainer.setAttribute('data-current-month', 'true');
+        }
+
         // Create month grid
         const monthGrid = document.createElement('div');
         monthGrid.className = 'month-grid';
-        
+
         // Add day headers
         dayHeaders.forEach(day => {
             const header = document.createElement('div');
@@ -166,38 +174,46 @@ function renderCalendar() {
             header.textContent = day;
             monthGrid.appendChild(header);
         });
-        
-        // Get first day of month and number of days
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
-        const startingDayOfWeek = firstDay.getDay();
-        
-        // Add previous month days
-        const prevMonthLastDay = new Date(year, month, 0);
-        const prevMonthDays = prevMonthLastDay.getDate();
-        for (let i = startingDayOfWeek - 1; i >= 0; i--) {
-            const day = prevMonthDays - i;
-            const date = new Date(year, month - 1, day);
-            addDayElement(monthGrid, date, true);
+
+
+
+    // Get first day of month and number of days
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+
+        // Calculate the starting day of the week (Monday as 0)
+        let startingDayOfWeek = firstDay.getDay();
+        // Adjust so Monday is 0, Sunday is 6
+        startingDayOfWeek = (startingDayOfWeek + 6) % 7;
+
+        // Add empty cells before the first day if needed for alignment
+        for (let i = 0; i < startingDayOfWeek; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'empty-day';
+            monthGrid.appendChild(emptyCell);
         }
-        
-        // Add current month days
+
+        // Only add current month days
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
             addDayElement(monthGrid, date, false);
         }
-        
-        // Add next month days to fill the grid
-        const totalCells = monthGrid.children.length - 7; // Subtract day headers
-        const remainingCells = (7 - (totalCells % 7)) % 7;
-        for (let day = 1; day <= remainingCells; day++) {
-            const date = new Date(year, month + 1, day);
-            addDayElement(monthGrid, date, true);
-        }
-        
+
         monthContainer.appendChild(monthGrid);
         calendar.appendChild(monthContainer);
+    }
+
+    // Scroll to current month only on initial load
+    if (!calendarHasScrolled) {
+        setTimeout(() => {
+            const calendarContainer = document.querySelector('.calendar-container');
+            const currentMonthEl = calendar.querySelector('[data-current-month="true"]');
+            if (calendarContainer && currentMonthEl) {
+                calendarContainer.scrollTop = currentMonthEl.offsetTop - calendarContainer.offsetTop;
+            }
+            calendarHasScrolled = true;
+        }, 0);
     }
 }
 
@@ -216,17 +232,18 @@ function addDayElement(calendar, date, isOtherMonth) {
         dayElement.classList.add('today');
     }
     
+
     // Check if in any range
     const inRange = isDateInAnyRange(date);
     if (inRange) {
         dayElement.classList.add('in-range');
     }
-    
+
     // Check if this is the currently selected start date (first click)
     if (selectionStart && !selectionEnd && isSameDay(date, selectionStart)) {
         dayElement.classList.add('selected');
     }
-    
+
     // Check if selected (start or end of a range)
     const isSelected = isDateSelectedBoundary(date);
     if (isSelected) {
@@ -245,6 +262,43 @@ function addDayElement(calendar, date, isOtherMonth) {
 }
 
 function handleDayClick(date) {
+
+    // Check if clicked date is inside any range
+    let affectedRange = null;
+    for (const range of dateRanges) {
+        const rangeStart = new Date(range.start);
+        const rangeEnd = new Date(range.end);
+        if (date >= rangeStart && date <= rangeEnd) {
+            affectedRange = range;
+            break;
+        }
+    }
+
+    if (affectedRange) {
+        const rangeStart = new Date(affectedRange.start);
+        const rangeEnd = new Date(affectedRange.end);
+        (async () => {
+            await deleteDateRange(affectedRange.id);
+            // Create left range (if valid)
+            const leftEnd = new Date(date);
+            leftEnd.setDate(leftEnd.getDate() - 1);
+            if (leftEnd >= rangeStart) {
+                await saveDateRange(rangeStart, leftEnd);
+            }
+            // Create right range (if valid)
+            const rightStart = new Date(date);
+            rightStart.setDate(rightStart.getDate() + 1);
+            if (rightStart <= rangeEnd) {
+                await saveDateRange(rightStart, rangeEnd);
+            }
+            selectionStart = null;
+            selectionEnd = null;
+            renderCalendar();
+        })();
+        return;
+    }
+
+    // Normal selection logic
     if (!selectionStart) {
         // Start a new selection
         selectionStart = new Date(date);

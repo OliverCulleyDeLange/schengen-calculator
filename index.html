@@ -8,11 +8,6 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Schengen Calculator</h1>
-            <p class="subtitle">Track your 90/180 day Schengen area visits</p>
-        </header>
-
         <div class="info-panel">
             <div class="stat-box">
                 <div class="stat-label">Days Used</div>
@@ -26,14 +21,13 @@
                 <div class="stat-label">⚠️ Warning</div>
                 <div class="stat-value warning-text" id="warningText"></div>
             </div>
-        </div>
-
-        <div class="controls">
-            <button id="clearAllBtn" class="btn btn-secondary">Clear All Dates</button>
-        </div>
+            </div>
 
         <div class="date-ranges">
-            <h2>Your Date Ranges</h2>
+            <div class="date-ranges-header">
+                <h2>Your Date Ranges</h2>
+                <button id="clearAllBtn" class="btn btn-secondary">Clear All Dates</button>
+            </div>
             <div id="rangesList"></div>
         </div>
 
@@ -44,7 +38,7 @@
 
     </div>
 
-    <script src="app.js"></script>
+        <script src="app.js"></script>
     <script data-goatcounter="https://ocd.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
 </body>
