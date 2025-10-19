@@ -1,3 +1,13 @@
+/* Privacy Policy Page Styles */
+.privacy-content {
+    background: #fff;
+    color: #333;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px #667eea33;
+    padding: 32px 24px;
+    max-width: 700px;
+    margin: 48px auto;
+}
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
