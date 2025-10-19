@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192">
+  <rect width="192" height="192" fill="white"/>
+  <text x="50%" y="70" text-anchor="middle" font-size="64" fill="black" font-family="Arial" font-weight="bold">90</text>
+  <line x1="32" y1="96" x2="160" y2="96" stroke="black" stroke-width="6"/>
+  <text x="50%" y="160" text-anchor="middle" font-size="64" fill="black" font-family="Arial" font-weight="bold">180</text>
+</svg>

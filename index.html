@@ -6,6 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schengen Calculator</title>
     <link rel="stylesheet" href="styles.css">
+        <!-- PWA Manifest & Meta Tags -->
+        <link rel="manifest" href="manifest.json">
+        <meta name="theme-color" content="#1976d2">
+        <meta name="description" content="Calculate your Schengen travel days easily.">
+        <link rel="icon" sizes="192x192" href="icon-192.png">
+        <link rel="icon" sizes="512x512" href="icon-512.png">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-title" content="SchengenCalc">
+        <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 
 <body>
@@ -59,6 +69,17 @@
     <div id="calendar"></div>
 
     <script type="module" src="app.js"></script>
+            <script>
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', function() {
+                        navigator.serviceWorker.register('service-worker.js').then(function(registration) {
+                            // Registration successful
+                        }, function(err) {
+                            // Registration failed
+                        });
+                    });
+                }
+            </script>
     <script data-goatcounter="https://ocd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 
