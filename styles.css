@@ -45,7 +45,7 @@ body {
 .month-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 8px;
     padding-bottom: 8px;
     justify-content: flex-start;
 }
@@ -54,7 +54,8 @@ body {
     color: #ffffff;
     text-align: left;
     display: block;
-    padding-bottom: 2px;
+    padding-bottom: 8px;
+    margin-top: 8px;
 }
 
 
@@ -65,12 +66,12 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 1px solid #e0e0e0;
+    border: 2px solid #e0e0e0;
     cursor: pointer;
     transition: all 0.1s;
     background: white;
     position: relative;
-    padding: 4px;
+    padding: 7px;
     border-radius: 50%;
     box-sizing: border-box;
     color: #667eea;
@@ -88,13 +89,27 @@ body {
 }
 
 .calendar-day.in-range {
-    background: #667eea;
+    background: transparent;
     color: white;
     border: 1px solid #0025cc;
+    font-weight: bold;
 }
 
 .calendar-day.today {
-    box-shadow: 0 0 0 2px #ffd93d inset;
+    position: relative;
+}
+
+.calendar-day.today::after {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    width: calc(100% + 12px);
+    height: calc(100% + 12px);
+    border: 4px solid #27ae60;
+    border-radius: 50%;
+    pointer-events: none;
+    box-sizing: border-box;
 }
 
 
