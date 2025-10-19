@@ -7,39 +7,18 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="info-panel">
-            <div class="stat-box">
-                <div class="stat-label">Days Used</div>
-                <div class="stat-value" id="daysUsed">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Days Remaining</div>
-                <div class="stat-value" id="daysRemaining">90</div>
-            </div>
-            <div class="stat-box warning-box" id="warningBox" style="display: none;">
-                <div class="stat-label">⚠️ Warning</div>
-                <div class="stat-value warning-text" id="warningText"></div>
-            </div>
-            </div>
 
-        <div class="date-ranges">
-            <div class="date-ranges-header">
-                <h2>Your Date Ranges</h2>
-                <button id="clearAllBtn" class="btn btn-secondary">Clear All Dates</button>
-            </div>
-            <div id="rangesList"></div>
-        </div>
+    <button id="resetBtn" class="reset-triangle" title="Reset">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="18" cy="18" r="16" stroke="#667eea" stroke-width="2" fill="#f0f0f0"/>
+            <path d="M24 12a8 8 0 1 0 2.34 5.66" stroke="#667eea" stroke-width="2" fill="none"/>
+            <polygon points="26,10 26,16 20,16" fill="#667eea"/>
+        </svg>
+    </button>
 
-        <div class="calendar-container">
-            <div id="calendar"></div>
-        </div>
+    <div id="calendar"></div>
 
-
-    </div>
-
-        <script src="app.js"></script>
-    <script data-goatcounter="https://ocd.goatcounter.com/count"
-            async src="//gc.zgo.at/count.js"></script>
+    <script type="module" src="app.js"></script>
+    <script data-goatcounter="https://ocd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
