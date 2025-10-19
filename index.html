@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schengen Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Schengen Calculator</h1>
+            <p class="subtitle">Track your 90/180 day Schengen area visits</p>
+        </header>
+
+        <div class="info-panel">
+            <div class="stat-box">
+                <div class="stat-label">Days Used</div>
+                <div class="stat-value" id="daysUsed">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Days Remaining</div>
+                <div class="stat-value" id="daysRemaining">90</div>
+            </div>
+            <div class="stat-box warning-box" id="warningBox" style="display: none;">
+                <div class="stat-label">⚠️ Warning</div>
+                <div class="stat-value warning-text" id="warningText"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="clearAllBtn" class="btn btn-secondary">Clear All Dates</button>
+            <button id="addRangeBtn" class="btn btn-primary">Add Date Range</button>
+        </div>
+
+        <div class="date-ranges">
+            <h2>Your Date Ranges</h2>
+            <div id="rangesList"></div>
+        </div>
+
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button id="prevMonth" class="nav-btn">&lt;</button>
+                <h2 id="currentMonth"></h2>
+                <button id="nextMonth" class="nav-btn">&gt;</button>
+            </div>
+            <div id="calendar"></div>
+        </div>
+
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <ol>
+                <li>Click on a date to start a range</li>
+                <li>Click on another date to complete the range</li>
+                <li>Your dates are automatically saved</li>
+                <li>The calculator shows if you exceed 90 days in any 180-day period</li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
