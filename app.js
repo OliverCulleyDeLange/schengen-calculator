@@ -120,16 +120,6 @@ async function clearAllRanges() {
 
 // Event listeners
 function setupEventListeners() {
-    document.getElementById('prevMonth').addEventListener('click', () => {
-        currentMonth.setMonth(currentMonth.getMonth() - 1);
-        renderCalendar();
-    });
-    
-    document.getElementById('nextMonth').addEventListener('click', () => {
-        currentMonth.setMonth(currentMonth.getMonth() + 1);
-        renderCalendar();
-    });
-    
     document.getElementById('clearAllBtn').addEventListener('click', async () => {
         if (confirm('Are you sure you want to clear all date ranges?')) {
             await clearAllRanges();
@@ -162,50 +152,72 @@ function renderCalendar() {
     const calendar = document.getElementById('calendar');
     calendar.innerHTML = '';
     
-    // Update month display
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                        'July', 'August', 'September', 'October', 'November', 'December'];
-    document.getElementById('currentMonth').textContent = 
-        `${monthNames[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`;
-    
-    // Add day headers
     const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    dayHeaders.forEach(day => {
-        const header = document.createElement('div');
-        header.className = 'day-header';
-        header.textContent = day;
-        calendar.appendChild(header);
-    });
     
-    // Get first day of month and number of days
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
+    // Render 12 months: 6 months back, current month, and 5 months forward
+    const today = new Date();
+    const startMonth = new Date(today.getFullYear(), today.getMonth() - 6, 1);
     
-    // Add previous month days
-    const prevMonthLastDay = new Date(year, month, 0);
-    const prevMonthDays = prevMonthLastDay.getDate();
-    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
-        const day = prevMonthDays - i;
-        const date = new Date(year, month - 1, day);
-        addDayElement(calendar, date, true);
-    }
-    
-    // Add current month days
-    for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month, day);
-        addDayElement(calendar, date, false);
-    }
-    
-    // Add next month days to fill the grid
-    const totalCells = calendar.children.length - 7; // Subtract day headers
-    const remainingCells = (7 - (totalCells % 7)) % 7;
-    for (let day = 1; day <= remainingCells; day++) {
-        const date = new Date(year, month + 1, day);
-        addDayElement(calendar, date, true);
+    for (let monthOffset = 0; monthOffset < 12; monthOffset++) {
+        const monthDate = new Date(startMonth.getFullYear(), startMonth.getMonth() + monthOffset, 1);
+        const year = monthDate.getFullYear();
+        const month = monthDate.getMonth();
+        
+        // Create month container
+        const monthContainer = document.createElement('div');
+        monthContainer.className = 'month-container';
+        
+        // Add month header
+        const monthHeader = document.createElement('div');
+        monthHeader.className = 'month-header';
+        monthHeader.textContent = `${monthNames[month]} ${year}`;
+        monthContainer.appendChild(monthHeader);
+        
+        // Create month grid
+        const monthGrid = document.createElement('div');
+        monthGrid.className = 'month-grid';
+        
+        // Add day headers
+        dayHeaders.forEach(day => {
+            const header = document.createElement('div');
+            header.className = 'day-header';
+            header.textContent = day;
+            monthGrid.appendChild(header);
+        });
+        
+        // Get first day of month and number of days
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDayOfWeek = firstDay.getDay();
+        
+        // Add previous month days
+        const prevMonthLastDay = new Date(year, month, 0);
+        const prevMonthDays = prevMonthLastDay.getDate();
+        for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+            const day = prevMonthDays - i;
+            const date = new Date(year, month - 1, day);
+            addDayElement(monthGrid, date, true);
+        }
+        
+        // Add current month days
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            addDayElement(monthGrid, date, false);
+        }
+        
+        // Add next month days to fill the grid
+        const totalCells = monthGrid.children.length - 7; // Subtract day headers
+        const remainingCells = (7 - (totalCells % 7)) % 7;
+        for (let day = 1; day <= remainingCells; day++) {
+            const date = new Date(year, month + 1, day);
+            addDayElement(monthGrid, date, true);
+        }
+        
+        monthContainer.appendChild(monthGrid);
+        calendar.appendChild(monthContainer);
     }
 }
 
