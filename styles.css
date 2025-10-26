@@ -29,6 +29,10 @@ body {
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
+    /* Performance optimizations */
+    will-change: scroll-position;
+    transform: translateZ(0);
+    -webkit-overflow-scrolling: touch;
 }
 
 #calendar::-webkit-scrollbar {
@@ -48,6 +52,8 @@ body {
     gap: 8px;
     padding-bottom: 8px;
     justify-content: flex-start;
+    /* Prevent layout thrashing */
+    contain: layout;
 }
 
 .month-label {
@@ -67,14 +73,19 @@ body {
     align-items: center;
     justify-content: center;
     border: 2px solid #e0e0e0;
+    background: transparent;
+    color: white;
+    border: 1px solid #0025cc;
+    font-weight: normal;
     cursor: pointer;
-    transition: all 0.1s;
-    background: white;
+    transition: transform 0.1s ease-out;
     position: relative;
     padding: 7px;
     border-radius: 50%;
     box-sizing: border-box;
-    color: #5d5d5d;
+    /* Performance optimizations */
+    contain: layout style;
+    transform: translateZ(0);
 }
 
 .calendar-day:hover {
@@ -86,14 +97,16 @@ body {
     border: 1px solid #0025cc;
     transform: scale(0.9);
     background: white;
-    opacity: 0.7;
+    color: #5d5d5d;
+    opacity: 0.4;
 
 }
 
+
 .calendar-day.in-range {
-    background: transparent;
-    color: white;
-    border: 1px solid #0025cc;
+    background: white;
+    color: #5d5d5d;
+    border: 2px solid #e0e0e0;
     font-weight: bold;
 }
 
@@ -140,7 +153,10 @@ body {
 }
 
 
-.reset-button, .info-button, .export-button, .import-button {
+.reset-button,
+.info-button,
+.export-button,
+.import-button {
     width: 48px;
     height: 48px;
     padding: 0;
@@ -152,16 +168,19 @@ body {
     display: block;
 }
 
-.export-button svg, .import-button svg {
+.export-button svg,
+.import-button svg {
     display: block;
     width: 100%;
     height: 100%;
 }
 
-.export-button:hover, .import-button:hover {
+.export-button:hover,
+.import-button:hover {
     filter: brightness(0.95) drop-shadow(0 2px 8px #667eea33);
     transform: scale(0.9);
 }
+
 .info-button svg {
     display: block;
     width: 100%;
@@ -184,13 +203,20 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 24px #667eea33;
     padding: 20px 24px 16px 24px;
-    animation: popover-expand 0.25s cubic-bezier(.4,2,.6,1) forwards;
+    animation: popover-expand 0.25s cubic-bezier(.4, 2, .6, 1) forwards;
     z-index: 1100;
 }
 
 @keyframes popover-expand {
-    0% { opacity: 0; transform: scale(0.7) translateY(20px); }
-    100% { opacity: 1; transform: scale(1) translateY(0); }
+    0% {
+        opacity: 0;
+        transform: scale(0.7) translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .info-content h3 {
@@ -237,6 +263,7 @@ body {
     text-decoration: underline;
     transition: color 0.15s;
 }
+
 .plain-text-btn:hover {
     color: #3b489c;
     text-decoration: underline;

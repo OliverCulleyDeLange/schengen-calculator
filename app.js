@@ -191,8 +191,8 @@ function addDayElement(calendar, date) {
         dayElement.classList.add('today');
     }
 
-    const inRange = calendarUtils.isDateInAnyRange(date, dateRanges);
 
+    const inRange = calendarUtils.isDateInAnyRange(date, dateRanges);
     if (inRange) {
         if (daysInWindow > 90) {
             dayElement.classList.add('schengen-over');
