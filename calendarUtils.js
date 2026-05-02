@@ -46,10 +46,14 @@ function isDateSelectedBoundary(date, dateRanges) {
     });
 }
 
- 
+
 function getDaysBetween(start, end) {
+    // Use UTC midnight so DST transitions can't produce 23-/25-hour days
+    // and skew the count by one. Inclusive of both endpoints.
     const msPerDay = 24 * 60 * 60 * 1000;
-    return Math.round((end - start) / msPerDay) + 1;
+    const startUtc = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+    const endUtc = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+    return Math.round((endUtc - startUtc) / msPerDay) + 1;
 }
 
  
