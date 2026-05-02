@@ -12,6 +12,7 @@ const PRECACHE = [
   '/db.js',
   '/dateStorage.js',
   '/rangeUtils.js',
+  '/modal.js',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',

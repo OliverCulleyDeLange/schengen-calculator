@@ -2,6 +2,7 @@ import * as calendarUtils from './calendarUtils.js';
 import * as db from './db.js';
 import { dateToYmd, parseImportPayload } from './dateStorage.js';
 import { mergeWithCandidate } from './rangeUtils.js';
+import { appConfirm, appAlert } from './modal.js';
 
 let dateRanges = [];
 let calendarHasScrolled = false;
@@ -50,9 +51,9 @@ async function handleImport() {
             }
             dateRanges = await db.loadDateRanges();
             renderCalendar();
-            alert('Dates imported successfully!');
+            await appAlert('Dates imported successfully!', 'Import');
         } catch (err) {
-            alert('Failed to import: ' + err.message);
+            await appAlert('Failed to import: ' + err.message, 'Import error');
         }
     });
     document.body.appendChild(input);
@@ -68,7 +69,8 @@ function setupEventListeners() {
     if (resetBtn) {
         resetBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            if (confirm('Are you sure you want to reset all data?')) {
+            const ok = await appConfirm('Are you sure you want to reset all data?', 'Reset');
+            if (ok) {
                 await db.clearAllRanges();
                 dateRanges = await db.loadDateRanges();
                 renderCalendar();

@@ -269,6 +269,72 @@ body {
     text-decoration: underline;
 }
 
+/* In-app modal (replaces native confirm/alert) */
+.app-modal[hidden] {
+    display: none;
+}
+
+.app-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.app-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.app-modal-card {
+    position: relative;
+    background: #fff;
+    color: #333;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    padding: 24px;
+    min-width: 280px;
+    max-width: 90vw;
+}
+
+.app-modal-title {
+    margin: 0 0 8px;
+    color: #667eea;
+}
+
+.app-modal-message {
+    margin: 0 0 20px;
+}
+
+.app-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.app-modal-actions button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #c7c7c7;
+    background: #f0f0f0;
+    color: #333;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.app-modal-actions .app-modal-ok {
+    background: #667eea;
+    color: #fff;
+    border-color: #667eea;
+}
+
+.app-modal-actions button[hidden] {
+    display: none;
+}
+
 /* Privacy Policy Page Styles */
 .privacy-content {
     background: #fff;
