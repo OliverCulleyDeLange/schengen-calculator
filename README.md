@@ -36,7 +36,7 @@ A comprehensive review of the codebase as of 2026-05-02. Items are grouped by se
 - [ ] **Popover not announced** — `index.html:31` has no `role="dialog"`, `aria-modal`, `aria-labelledby`, or focus trap. Pressing Esc doesn't close it.
 - [ ] **Native `confirm()`/`alert()`** — `app.js:65, 67, 78` use blocking native dialogs. Replace with in-app modals for consistent UX.
 - [ ] **Inline `onclick` handlers** — `index.html:49` calls `handleExport()`/`handleImport()` via inline attributes, which forced the code in `app.js:22, 41` to leak globals onto `window`. Use `addEventListener` and remove the globals; this also unblocks a strict CSP later.
-- [ ] **Theme colors inconsistent** — `manifest.json:7` and `index.html:11` both declare `#1976d2`, but the actual UI gradient uses `#667eea`/`#764ba2` (`styles.css:3`). The browser chrome and splash will not match the app.
+- [x] **Theme colors inconsistent** — `manifest.json:7` and `index.html:11` both declare `#1976d2`, but the actual UI gradient uses `#667eea`/`#764ba2` (`styles.css:3`). The browser chrome and splash will not match the app.
 
 ### Medium (performance / structure)
 

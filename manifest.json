@@ -3,8 +3,8 @@
   "short_name": "SchengenCalc",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1976d2",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
   "description": "Calculate your Schengen travel days easily.",
   "icons": [
     {
