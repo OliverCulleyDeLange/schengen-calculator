@@ -81,23 +81,45 @@ function setupEventListeners() {
     const infoBtn = document.getElementById('infoBtn');
     const infoPopover = document.getElementById('infoPopover');
     const closeInfo = document.getElementById('closeInfo');
+
+    function openPopover() {
+        if (!infoPopover) return;
+        infoPopover.hidden = false;
+        infoBtn?.setAttribute('aria-expanded', 'true');
+        // Move focus into the dialog so screen readers announce it.
+        (closeInfo || infoPopover).focus?.();
+    }
+    function closePopover() {
+        if (!infoPopover) return;
+        infoPopover.hidden = true;
+        infoBtn?.setAttribute('aria-expanded', 'false');
+        infoBtn?.focus?.();
+    }
+    function isPopoverOpen() {
+        return infoPopover && !infoPopover.hidden;
+    }
+
     if (infoBtn && infoPopover) {
         infoBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            infoPopover.style.display = 'block';
+            isPopoverOpen() ? closePopover() : openPopover();
         });
     }
     if (closeInfo && infoPopover) {
         closeInfo.addEventListener('click', (e) => {
             e.preventDefault();
-            infoPopover.style.display = 'none';
+            closePopover();
         });
     }
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isPopoverOpen()) {
+            e.preventDefault();
+            closePopover();
+        }
+    });
     document.addEventListener('mousedown', (e) => {
-        if (infoPopover && infoPopover.style.display === 'block') {
-            if (!infoPopover.contains(e.target) && e.target !== infoBtn) {
-                infoPopover.style.display = 'none';
-            }
+        if (isPopoverOpen() && !infoPopover.contains(e.target) && e.target !== infoBtn) {
+            closePopover();
         }
     });
 }
@@ -158,10 +180,15 @@ function renderCalendar() {
     }
 }
 
-function addDayElement(calendar, date) {
+const DAY_LABEL_FMT = (typeof Intl !== 'undefined')
+    ? new Intl.DateTimeFormat(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : null;
 
+function addDayElement(calendar, date) {
     const dayElement = document.createElement('div');
     dayElement.className = 'calendar-day';
+    dayElement.setAttribute('role', 'button');
+    dayElement.setAttribute('tabindex', '0');
 
     const dayNumber = document.createElement('div');
     dayNumber.textContent = date.getDate();
@@ -180,7 +207,6 @@ function addDayElement(calendar, date) {
         dayElement.classList.add('today');
     }
 
-
     const inRange = calendarUtils.isDateInAnyRange(date, dateRanges);
     if (inRange) {
         if (daysInWindow > 90) {
@@ -192,9 +218,22 @@ function addDayElement(calendar, date) {
 
     if (selectionStart && !selectionEnd && calendarUtils.isSameDay(date, selectionStart)) {
         dayElement.classList.add('selected');
+        dayElement.setAttribute('aria-pressed', 'true');
     }
 
+    const label = DAY_LABEL_FMT ? DAY_LABEL_FMT.format(date) : date.toDateString();
+    const status = inRange
+        ? (daysInWindow > 90 ? `selected, ${daysInWindow} days used (over 90 limit)` : `selected, ${daysInWindow} days used in 180-day window`)
+        : `${daysInWindow} days used in 180-day window`;
+    dayElement.setAttribute('aria-label', `${label}, ${status}`);
+
     dayElement.addEventListener('click', () => handleDayClick(date));
+    dayElement.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleDayClick(date);
+        }
+    });
 
     calendar.appendChild(dayElement);
 }

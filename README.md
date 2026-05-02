@@ -31,9 +31,9 @@ A comprehensive review of the codebase as of 2026-05-02. Items are grouped by se
 
 ### High (UX / accessibility)
 
-- [ ] **No keyboard accessibility for day cells** — `app.js:172-211` creates `<div>` cells with click handlers only. No `tabindex`, `role="button"`, `aria-label`, or Enter/Space handling. Calendar is unusable with a keyboard or screen reader.
-- [ ] **Icon buttons missing `aria-label`** — `index.html:24, 61` rely on `title` only; SVGs have no `<title>` element. Screen readers announce nothing useful.
-- [ ] **Popover not announced** — `index.html:31` has no `role="dialog"`, `aria-modal`, `aria-labelledby`, or focus trap. Pressing Esc doesn't close it.
+- [x] **No keyboard accessibility for day cells** — `app.js:172-211` creates `<div>` cells with click handlers only. No `tabindex`, `role="button"`, `aria-label`, or Enter/Space handling. Calendar is unusable with a keyboard or screen reader.
+- [x] **Icon buttons missing `aria-label`** — `index.html:24, 61` rely on `title` only; SVGs have no `<title>` element. Screen readers announce nothing useful.
+- [x] **Popover not announced** — `index.html:31` has no `role="dialog"`, `aria-modal`, `aria-labelledby`, or focus trap. Pressing Esc doesn't close it.
 - [x] **Native `confirm()`/`alert()`** — `app.js:65, 67, 78` use blocking native dialogs. Replace with in-app modals for consistent UX.
 - [x] **Inline `onclick` handlers** — `index.html:49` calls `handleExport()`/`handleImport()` via inline attributes, which forced the code in `app.js:22, 41` to leak globals onto `window`. Use `addEventListener` and remove the globals; this also unblocks a strict CSP later.
 - [x] **Theme colors inconsistent** — `manifest.json:7` and `index.html:11` both declare `#1976d2`, but the actual UI gradient uses `#667eea`/`#764ba2` (`styles.css:3`). The browser chrome and splash will not match the app.
