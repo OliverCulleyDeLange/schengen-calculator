@@ -15,51 +15,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
 });
 
-function setupEventListeners() {
-    window.handleExport = function handleExport() {
-        const exportData = dateRanges.map(r => ({
-            start: dateToYmd(r.start),
-            end: dateToYmd(r.end)
-        }));
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'schengen.json';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }, 0);
-    }
+function handleExport() {
+    const exportData = dateRanges.map(r => ({
+        start: dateToYmd(r.start),
+        end: dateToYmd(r.end)
+    }));
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'schengen.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 0);
+}
 
-    window.handleImport = async function handleImport() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'application/json';
-        input.style.display = 'none';
-        input.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            try {
-                const text = await file.text();
-                const sanitized = parseImportPayload(JSON.parse(text));
-                await db.clearAllRanges();
-                for (const r of sanitized) {
-                    await db.saveDateRange(r.start, r.end);
-                }
-                dateRanges = await db.loadDateRanges();
-                renderCalendar();
-                alert('Dates imported successfully!');
-            } catch (err) {
-                alert('Failed to import: ' + err.message);
+async function handleImport() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.style.display = 'none';
+    input.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        try {
+            const text = await file.text();
+            const sanitized = parseImportPayload(JSON.parse(text));
+            await db.clearAllRanges();
+            for (const r of sanitized) {
+                await db.saveDateRange(r.start, r.end);
             }
-        });
-        document.body.appendChild(input);
-        input.click();
-        setTimeout(() => document.body.removeChild(input), 1000);
-    }
+            dateRanges = await db.loadDateRanges();
+            renderCalendar();
+            alert('Dates imported successfully!');
+        } catch (err) {
+            alert('Failed to import: ' + err.message);
+        }
+    });
+    document.body.appendChild(input);
+    input.click();
+    setTimeout(() => document.body.removeChild(input), 1000);
+}
+
+function setupEventListeners() {
+    document.getElementById('exportBtn')?.addEventListener('click', handleExport);
+    document.getElementById('importBtn')?.addEventListener('click', handleImport);
+
     const resetBtn = document.getElementById('resetBtn');
     if (resetBtn) {
         resetBtn.addEventListener('click', async (e) => {
@@ -87,7 +91,6 @@ function setupEventListeners() {
             infoPopover.style.display = 'none';
         });
     }
-    // Optional: close popover when clicking outside
     document.addEventListener('mousedown', (e) => {
         if (infoPopover && infoPopover.style.display === 'block') {
             if (!infoPopover.contains(e.target) && e.target !== infoBtn) {
@@ -95,7 +98,6 @@ function setupEventListeners() {
             }
         }
     });
-
 }
 
 function renderCalendar() {

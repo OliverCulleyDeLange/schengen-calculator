@@ -35,7 +35,7 @@ A comprehensive review of the codebase as of 2026-05-02. Items are grouped by se
 - [ ] **Icon buttons missing `aria-label`** — `index.html:24, 61` rely on `title` only; SVGs have no `<title>` element. Screen readers announce nothing useful.
 - [ ] **Popover not announced** — `index.html:31` has no `role="dialog"`, `aria-modal`, `aria-labelledby`, or focus trap. Pressing Esc doesn't close it.
 - [ ] **Native `confirm()`/`alert()`** — `app.js:65, 67, 78` use blocking native dialogs. Replace with in-app modals for consistent UX.
-- [ ] **Inline `onclick` handlers** — `index.html:49` calls `handleExport()`/`handleImport()` via inline attributes, which forced the code in `app.js:22, 41` to leak globals onto `window`. Use `addEventListener` and remove the globals; this also unblocks a strict CSP later.
+- [x] **Inline `onclick` handlers** — `index.html:49` calls `handleExport()`/`handleImport()` via inline attributes, which forced the code in `app.js:22, 41` to leak globals onto `window`. Use `addEventListener` and remove the globals; this also unblocks a strict CSP later.
 - [x] **Theme colors inconsistent** — `manifest.json:7` and `index.html:11` both declare `#1976d2`, but the actual UI gradient uses `#667eea`/`#764ba2` (`styles.css:3`). The browser chrome and splash will not match the app.
 
 ### Medium (performance / structure)
@@ -55,7 +55,7 @@ A comprehensive review of the codebase as of 2026-05-02. Items are grouped by se
 - [ ] **`isDateSelectedBoundary` exported but unused** — `calendarUtils.js:43` is dead code.
 - [ ] **`checkExceedsLimit` duplicates `getDaysInWindow`** — `calendarUtils.js:56-74` reimplements the same loop just to compare against 90; replace with `getDaysInWindow(...) > 90`.
 - [ ] **`splitRange` is a closure inside `handleDayClick`** — `app.js:261` would be clearer as a top-level function taking the range and date.
-- [ ] **Empty SW registration callbacks** — `index.html:75-79` swallow errors silently. Log failures.
+- [x] **Empty SW registration callbacks** — `index.html:75-79` swallow errors silently. Log failures.
 - [ ] **Manifest missing fields** — Add `id`, `scope`, `lang`, `categories`, and a maskable icon (`purpose: "any maskable"`) for better PWA install behavior on Android.
 - [ ] **No `.gitignore` entries for OS/editor cruft** — Verify `.DS_Store`, `node_modules/`, etc. are ignored if any tooling is added.
 - [ ] **No tests** — At minimum add unit tests for `calendarUtils.getDaysInWindow` (boundary cases, DST, overlapping ranges, empty input).

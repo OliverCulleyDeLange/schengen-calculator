@@ -46,7 +46,7 @@
                 </p>
                 <h4>Tools</h4>
                 <div>
-                    <button class="plain-text-btn" onclick="handleExport()">Export</button> / <button class="plain-text-btn" onclick="handleImport()">Import</button>
+                    <button id="exportBtn" class="plain-text-btn">Export</button> / <button id="importBtn" class="plain-text-btn">Import</button>
                 </div>
                 <p>
                     <a href="https://github.com/OliverCulleyDeLange/schengen-calculator" target="_blank"
@@ -72,10 +72,8 @@
             <script>
                 if ('serviceWorker' in navigator) {
                     window.addEventListener('load', function() {
-                        navigator.serviceWorker.register('service-worker.js').then(function(registration) {
-                            // Registration successful
-                        }, function(err) {
-                            // Registration failed
+                        navigator.serviceWorker.register('service-worker.js').catch(function(err) {
+                            console.error('Service worker registration failed:', err);
                         });
                     });
                 }
