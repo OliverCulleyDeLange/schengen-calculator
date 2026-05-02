@@ -20,14 +20,14 @@ A comprehensive review of the codebase as of 2026-05-02. Items are grouped by se
 
 ### Critical (correctness / data integrity)
 
-- [ ] **Timezone bug in date persistence** — `db.js:38-39` saves dates with `toISOString()` (UTC), while dates are constructed locally via `new Date(year, month, day)` in `app.js:151`. For users in negative UTC offsets, a date created at local midnight serializes to the previous calendar day in UTC and round-trips back as the wrong day. Store as `YYYY-MM-DD` strings or as `{year, month, day}` to keep date-only semantics.
+- [x] **Timezone bug in date persistence** — `db.js:38-39` saves dates with `toISOString()` (UTC), while dates are constructed locally via `new Date(year, month, day)` in `app.js:151`. For users in negative UTC offsets, a date created at local midnight serializes to the previous calendar day in UTC and round-trips back as the wrong day. Store as `YYYY-MM-DD` strings or as `{year, month, day}` to keep date-only semantics.
 - [ ] **Overlapping ranges are double-counted** — `app.js:241-248` only deletes ranges *fully contained* by the new selection. A partially overlapping range survives, and `calendarUtils.getDaysInWindow` (`calendarUtils.js:8-18`) sums each range independently, double-counting overlapping days. Merge or trim partial overlaps before saving.
 - [x] **DST off-by-one in `getDaysBetween`** — `calendarUtils.js:50-53` divides ms diff by 86400000 and rounds. On DST transition days, two midnight-local dates can be 23 or 25 hours apart, producing off-by-one counts. Use `Date.UTC(y, m, d)` or pure y/m/d arithmetic.
 - [ ] **Service worker never invalidates on deploy** — `service-worker.js:1` uses a static `schengen-calculator-v1` cache name. JS/CSS edits won't reach users until the constant is bumped. Either bump the version on every release (build step) or use stale-while-revalidate for assets.
 - [ ] **Privacy page broken offline** — `service-worker.js:2-12` does not precache `/privacy/index.html`, so the linked privacy policy 404s offline.
 - [ ] **No navigation fallback in SW** — Cache-first match without `event.request.mode === 'navigate'` fallback to `/index.html` will fail for direct deep links offline.
 - [ ] **Import does not validate item shape** — `app.js:51-58` only checks `Array.isArray(imported)` and then trusts each item's `.start`/`.end`. Malformed input produces `Invalid Date` rows that poison IndexedDB.
-- [ ] **No IndexedDB schema versioning strategy** — `db.js:2` is `DB_VERSION = 1` with no migration path. Any future schema change will silently corrupt existing user data.
+- [x] **No IndexedDB schema versioning strategy** — `db.js:2` is `DB_VERSION = 1` with no migration path. Any future schema change will silently corrupt existing user data.
 
 ### High (UX / accessibility)
 

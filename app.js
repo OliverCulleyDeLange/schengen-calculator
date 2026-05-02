@@ -1,5 +1,6 @@
 import * as calendarUtils from './calendarUtils.js';
 import * as db from './db.js';
+import { dateToYmd, ymdToDate } from './dateStorage.js';
 
 let dateRanges = [];
 let calendarHasScrolled = false;
@@ -8,12 +9,7 @@ let selectionEnd = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     await db.initDB();
-    const ranges = await db.loadDateRanges();
-    dateRanges = ranges.map(range => ({
-        ...range,
-        start: new Date(range.start),
-        end: new Date(range.end)
-    }));
+    dateRanges = await db.loadDateRanges();
     renderCalendar();
     setupEventListeners();
 });
@@ -21,9 +17,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 function setupEventListeners() {
     window.handleExport = function handleExport() {
         const exportData = dateRanges.map(r => ({
-            ...r,
-            start: r.start instanceof Date ? r.start.toISOString() : r.start,
-            end: r.end instanceof Date ? r.end.toISOString() : r.end
+            start: dateToYmd(r.start),
+            end: dateToYmd(r.end)
         }));
         const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -50,17 +45,25 @@ function setupEventListeners() {
                 const text = await file.text();
                 const imported = JSON.parse(text);
                 if (!Array.isArray(imported)) throw new Error('Invalid file format');
+                const sanitized = imported.map((r, idx) => {
+                    if (!r || typeof r !== 'object') {
+                        throw new Error(`Item ${idx} is not an object`);
+                    }
+                    let start, end;
+                    try { start = ymdToDate(r.start); }
+                    catch (e) { throw new Error(`Item ${idx} has invalid start: ${r.start}`); }
+                    try { end = ymdToDate(r.end); }
+                    catch (e) { throw new Error(`Item ${idx} has invalid end: ${r.end}`); }
+                    if (start > end) {
+                        throw new Error(`Item ${idx} has start after end`);
+                    }
+                    return { start, end };
+                });
                 await db.clearAllRanges();
-                for (const r of imported) {
-                    const start = new Date(r.start);
-                    const end = new Date(r.end);
-                    await db.saveDateRange(start, end);
+                for (const r of sanitized) {
+                    await db.saveDateRange(r.start, r.end);
                 }
-                dateRanges = (await db.loadDateRanges()).map(range => ({
-                    ...range,
-                    start: new Date(range.start),
-                    end: new Date(range.end)
-                }));
+                dateRanges = await db.loadDateRanges();
                 renderCalendar();
                 alert('Dates imported successfully!');
             } catch (err) {
@@ -77,11 +80,7 @@ function setupEventListeners() {
             e.preventDefault();
             if (confirm('Are you sure you want to reset all data?')) {
                 await db.clearAllRanges();
-                dateRanges = (await db.loadDateRanges()).map(range => ({
-                    ...range,
-                    start: new Date(range.start),
-                    end: new Date(range.end)
-                }));
+                dateRanges = await db.loadDateRanges();
                 renderCalendar();
             }
         });
@@ -248,11 +247,7 @@ async function handleDayClick(date) {
         }
 
         await db.saveDateRange(selectionStart, selectionEnd);
-        dateRanges = (await db.loadDateRanges()).map(range => ({
-            ...range,
-            start: new Date(range.start),
-            end: new Date(range.end)
-        }));
+        dateRanges = await db.loadDateRanges();
         renderCalendar();
         selectionStart = null;
         selectionEnd = null;
@@ -274,11 +269,7 @@ async function handleDayClick(date) {
         }
         selectionStart = null;
         selectionEnd = null;
-        dateRanges = (await db.loadDateRanges()).map(range => ({
-            ...range,
-            start: new Date(range.start),
-            end: new Date(range.end)
-        }));
+        dateRanges = await db.loadDateRanges();
     }
 }
 
