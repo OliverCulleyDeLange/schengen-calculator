@@ -3,6 +3,7 @@ import './calendarUtils.test.js';
 import './dateStorage.test.js';
 import './ranges.test.js';
 import './importValidation.test.js';
+import './serviceWorker.test.js';
 
 // JSC needs a moment for any pending microtasks.
 await Promise.resolve();
