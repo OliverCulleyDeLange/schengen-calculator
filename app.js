@@ -1,6 +1,7 @@
 import * as calendarUtils from './calendarUtils.js';
 import * as db from './db.js';
 import { dateToYmd, parseImportPayload } from './dateStorage.js';
+import { mergeWithCandidate } from './rangeUtils.js';
 
 let dateRanges = [];
 let calendarHasScrolled = false;
@@ -221,17 +222,17 @@ async function handleDayClick(date) {
             [selectionStart, selectionEnd] = [selectionEnd, selectionStart];
         }
 
-        // Delete any ranges fully within the new selection
-        const rangesToDelete = dateRanges.filter(range => {
-            const rangeStart = new Date(range.start);
-            const rangeEnd = new Date(range.end);
-            return rangeStart >= selectionStart && rangeEnd <= selectionEnd;
+        // Merge the new selection with any overlapping existing ranges so
+        // we never store overlapping ranges (which would cause days to be
+        // double-counted by getDaysInWindow).
+        const { merged, absorbed } = mergeWithCandidate(dateRanges, {
+            start: selectionStart,
+            end: selectionEnd
         });
-        for (const range of rangesToDelete) {
+        for (const range of absorbed) {
             await db.deleteDateRange(range.id);
         }
-
-        await db.saveDateRange(selectionStart, selectionEnd);
+        await db.saveDateRange(merged.start, merged.end);
         dateRanges = await db.loadDateRanges();
         renderCalendar();
         selectionStart = null;
