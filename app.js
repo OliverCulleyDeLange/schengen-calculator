@@ -1,6 +1,6 @@
 import * as calendarUtils from './calendarUtils.js';
 import * as db from './db.js';
-import { dateToYmd, parseImportPayload } from './dateStorage.js';
+import { dateToYmd, ymdToDate, parseImportPayload } from './dateStorage.js';
 import { mergeWithCandidate } from './rangeUtils.js';
 import { appConfirm, appAlert } from './modal.js';
 
@@ -12,6 +12,7 @@ let selectionEnd = null;
 document.addEventListener('DOMContentLoaded', async () => {
     await db.initDB();
     dateRanges = await db.loadDateRanges();
+    setupCalendarDelegation();
     renderCalendar();
     setupEventListeners();
 });
@@ -124,18 +125,32 @@ function setupEventListeners() {
     });
 }
 
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+
+const DAY_LABEL_FMT = (typeof Intl !== 'undefined')
+    ? new Intl.DateTimeFormat(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : null;
+
 function renderCalendar() {
     const calendar = document.getElementById('calendar');
     calendar.innerHTML = '';
 
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'];
-
-    // Render 25 months: 12 months back, current month, and 12 months forward
+    // 12 months back, current month, 12 months forward.
     const today = new Date();
     const startMonth = new Date(today.getFullYear(), today.getMonth() - 12, 1);
-    let currentMonthIndex = null;
+    const firstDay = new Date(startMonth);
+    // Total rendered days: sum of days in each rendered month. We compute
+    // this so we can size the precompute buffer correctly.
+    let totalDays = 0;
+    for (let m = 0; m < 25; m++) {
+        const md = new Date(firstDay.getFullYear(), firstDay.getMonth() + m + 1, 0);
+        totalDays += md.getDate();
+    }
 
+    const counts = calendarUtils.precomputeDaysInWindow(firstDay, totalDays, dateRanges);
+
+    const fragment = document.createDocumentFragment();
     for (let monthOffset = 0; monthOffset < 25; monthOffset++) {
         const monthDate = new Date(startMonth.getFullYear(), startMonth.getMonth() + monthOffset, 1);
         const year = monthDate.getFullYear();
@@ -143,114 +158,104 @@ function renderCalendar() {
         const monthContainer = document.createElement('div');
         monthContainer.className = 'month-container';
         if (year === today.getFullYear() && month === today.getMonth()) {
-            currentMonthIndex = monthOffset;
             monthContainer.setAttribute('data-current-month', 'true');
         }
+
+        const monthLabel = document.createElement('div');
+        monthLabel.className = 'month-label';
+        monthLabel.textContent = `${MONTH_NAMES[month]} ${year}`;
+        monthContainer.appendChild(monthLabel);
 
         const monthGrid = document.createElement('div');
         monthGrid.className = 'month-grid';
 
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
-
-        const monthLabel = document.createElement('div');
-        monthLabel.className = 'month-label';
-        monthLabel.textContent = `${monthNames[month]} ${year}`;
-        monthContainer.appendChild(monthLabel);
-
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
-            addDayElement(monthGrid, date);
+            monthGrid.appendChild(buildDayElement(date, counts.get(date), today));
         }
 
         monthContainer.appendChild(monthGrid);
-        calendar.appendChild(monthContainer);
+        fragment.appendChild(monthContainer);
     }
+    calendar.appendChild(fragment);
 
-    // Scroll to current month only on initial load
     if (!calendarHasScrolled) {
         setTimeout(() => {
-            const calendarContainer = document.querySelector('#calendar');
             const currentMonthEl = calendar.querySelector('[data-current-month="true"]');
-            if (calendarContainer && currentMonthEl) {
-                calendarContainer.scrollTop = currentMonthEl.offsetTop - calendarContainer.offsetTop;
+            if (currentMonthEl) {
+                calendar.scrollTop = currentMonthEl.offsetTop - calendar.offsetTop;
             }
             calendarHasScrolled = true;
         }, 0);
     }
 }
 
-const DAY_LABEL_FMT = (typeof Intl !== 'undefined')
-    ? new Intl.DateTimeFormat(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-    : null;
-
-function addDayElement(calendar, date) {
-    const dayElement = document.createElement('div');
-    dayElement.className = 'calendar-day';
-    dayElement.setAttribute('role', 'button');
-    dayElement.setAttribute('tabindex', '0');
+function buildDayElement(date, daysInWindow, today) {
+    const el = document.createElement('div');
+    el.className = 'calendar-day';
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.dataset.date = dateToYmd(date);
 
     const dayNumber = document.createElement('div');
     dayNumber.textContent = date.getDate();
     dayNumber.className = 'calendar-day-number';
 
-    const daysInWindow = calendarUtils.getDaysInWindow(date, dateRanges);
     const daysInWindowDiv = document.createElement('div');
     daysInWindowDiv.className = 'calendar-days-in-window';
     daysInWindowDiv.textContent = daysInWindow;
 
-    dayElement.appendChild(dayNumber);
-    dayElement.appendChild(daysInWindowDiv);
+    el.appendChild(dayNumber);
+    el.appendChild(daysInWindowDiv);
 
-    const today = new Date();
-    if (calendarUtils.isSameDay(date, today)) {
-        dayElement.classList.add('today');
-    }
+    if (calendarUtils.isSameDay(date, today)) el.classList.add('today');
 
     const inRange = calendarUtils.isDateInAnyRange(date, dateRanges);
     if (inRange) {
-        if (daysInWindow > 90) {
-            dayElement.classList.add('schengen-over');
-        } else {
-            dayElement.classList.add('in-range');
-        }
+        el.classList.add(daysInWindow > 90 ? 'schengen-over' : 'in-range');
     }
 
     if (selectionStart && !selectionEnd && calendarUtils.isSameDay(date, selectionStart)) {
-        dayElement.classList.add('selected');
-        dayElement.setAttribute('aria-pressed', 'true');
+        el.classList.add('selected');
+        el.setAttribute('aria-pressed', 'true');
     }
 
     const label = DAY_LABEL_FMT ? DAY_LABEL_FMT.format(date) : date.toDateString();
     const status = inRange
         ? (daysInWindow > 90 ? `selected, ${daysInWindow} days used (over 90 limit)` : `selected, ${daysInWindow} days used in 180-day window`)
         : `${daysInWindow} days used in 180-day window`;
-    dayElement.setAttribute('aria-label', `${label}, ${status}`);
+    el.setAttribute('aria-label', `${label}, ${status}`);
 
-    dayElement.addEventListener('click', () => handleDayClick(date));
-    dayElement.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+    return el;
+}
+
+function setupCalendarDelegation() {
+    const calendar = document.getElementById('calendar');
+    if (!calendar) return;
+    calendar.addEventListener('click', (e) => {
+        const cell = e.target.closest('.calendar-day');
+        if (cell && calendar.contains(cell)) handleDayClick(ymdToDate(cell.dataset.date));
+    });
+    calendar.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const cell = e.target.closest('.calendar-day');
+        if (cell && calendar.contains(cell)) {
             e.preventDefault();
-            handleDayClick(date);
+            handleDayClick(ymdToDate(cell.dataset.date));
         }
     });
-
-    calendar.appendChild(dayElement);
 }
 
 async function handleDayClick(date) {
-    let clickedDayInRange = null;
-    for (const range of dateRanges) {
-        const rangeStart = new Date(range.start);
-        const rangeEnd = new Date(range.end);
-        if (date >= rangeStart && date <= rangeEnd) {
-            clickedDayInRange = range;
-            break;
-        }
-    }
+    const clickedDayInRange = dateRanges.find(
+        r => date >= r.start && date <= r.end
+    );
 
     if (clickedDayInRange) {
-        await splitRange();
+        await splitRange(clickedDayInRange, date);
+        selectionStart = null;
+        selectionEnd = null;
         renderCalendar();
         return;
     }
@@ -259,46 +264,46 @@ async function handleDayClick(date) {
         selectionStart = new Date(date);
         selectionEnd = null;
         renderCalendar();
-    } else if (!selectionEnd) {
+        return;
+    }
+    if (!selectionEnd) {
         selectionEnd = new Date(date);
         if (selectionStart > selectionEnd) {
             [selectionStart, selectionEnd] = [selectionEnd, selectionStart];
         }
-
-        // Merge the new selection with any overlapping existing ranges so
-        // we never store overlapping ranges (which would cause days to be
-        // double-counted by getDaysInWindow).
         const { merged, absorbed } = mergeWithCandidate(dateRanges, {
             start: selectionStart,
             end: selectionEnd
         });
         for (const range of absorbed) {
             await db.deleteDateRange(range.id);
+            const idx = dateRanges.findIndex(r => r.id === range.id);
+            if (idx !== -1) dateRanges.splice(idx, 1);
         }
-        await db.saveDateRange(merged.start, merged.end);
-        dateRanges = await db.loadDateRanges();
+        const saved = await db.saveDateRange(merged.start, merged.end);
+        dateRanges.push(saved);
+        selectionStart = null;
+        selectionEnd = null;
         renderCalendar();
-        selectionStart = null;
-        selectionEnd = null;
     }
+}
 
-    async function splitRange() {
-        const rangeStart = new Date(clickedDayInRange.start);
-        const rangeEnd = new Date(clickedDayInRange.end);
-        await db.deleteDateRange(clickedDayInRange.id);
-        const leftEnd = new Date(date);
-        leftEnd.setDate(leftEnd.getDate() - 1);
-        if (leftEnd >= rangeStart) {
-            await db.saveDateRange(rangeStart, leftEnd);
-        }
-        const rightStart = new Date(date);
-        rightStart.setDate(rightStart.getDate() + 1);
-        if (rightStart <= rangeEnd) {
-            await db.saveDateRange(rightStart, rangeEnd);
-        }
-        selectionStart = null;
-        selectionEnd = null;
-        dateRanges = await db.loadDateRanges();
+async function splitRange(range, splitDate) {
+    await db.deleteDateRange(range.id);
+    const idx = dateRanges.findIndex(r => r.id === range.id);
+    if (idx !== -1) dateRanges.splice(idx, 1);
+
+    const leftEnd = new Date(splitDate);
+    leftEnd.setDate(leftEnd.getDate() - 1);
+    if (leftEnd >= range.start) {
+        const saved = await db.saveDateRange(range.start, leftEnd);
+        dateRanges.push(saved);
+    }
+    const rightStart = new Date(splitDate);
+    rightStart.setDate(rightStart.getDate() + 1);
+    if (rightStart <= range.end) {
+        const saved = await db.saveDateRange(rightStart, range.end);
+        dateRanges.push(saved);
     }
 }
 

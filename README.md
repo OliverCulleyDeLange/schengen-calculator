@@ -41,10 +41,10 @@ A comprehensive review of the codebase as of 2026-05-02. Items are grouped by se
 ### Medium (performance / structure)
 
 - [ ] **Full DOM rebuild on every interaction** — `renderCalendar` (`app.js:116`) wipes `#calendar` and rebuilds 25 months × ~30 days on every click, import, reset, and selection step. Use targeted updates or a virtualized list.
-- [ ] **Click handler per cell** — `app.js:208` attaches a listener to every day (~775 listeners). Use event delegation on `#calendar`.
-- [ ] **`getDaysInWindow` recomputed per cell** — `calendarUtils.js:2` is O(ranges) per day × O(days) cells per render = O(days × ranges) every render. Precompute a daily count array once per render.
-- [ ] **Date objects re-allocated repeatedly** — `calendarUtils.js` builds new `Date` instances for every range on every call; same in `app.js:215-222, 241-245`. Normalize ranges once after load.
-- [ ] **Reload-after-write pattern** — `app.js:59, 80, 251, 277` re-fetches all ranges from IndexedDB after every mutation. Update the in-memory array directly.
+- [x] **Click handler per cell** — `app.js:208` attaches a listener to every day (~775 listeners). Use event delegation on `#calendar`.
+- [x] **`getDaysInWindow` recomputed per cell** — `calendarUtils.js:2` is O(ranges) per day × O(days) cells per render = O(days × ranges) every render. Precompute a daily count array once per render.
+- [x] **Date objects re-allocated repeatedly** — `calendarUtils.js` builds new `Date` instances for every range on every call; same in `app.js:215-222, 241-245`. Normalize ranges once after load.
+- [x] **Reload-after-write pattern** — `app.js:59, 80, 251, 277` re-fetches all ranges from IndexedDB after every mutation. Update the in-memory array directly.
 - [x] **Service worker missing `skipWaiting`/`clients.claim`** — `service-worker.js` requires closing every tab to pick up an update.
 - [ ] **External script lacks SRI and uses protocol-relative URL** — `index.html:83` loads `//gc.zgo.at/count.js` without integrity hash and with `//`. Use `https://` and `integrity=`/`crossorigin=` if GoatCounter publishes a hash.
 
@@ -52,13 +52,13 @@ A comprehensive review of the codebase as of 2026-05-02. Items are grouped by se
 
 - [ ] **Duplicate CSS declarations** — `styles.css:5` and `:12` both set `min-height: 100vh`; `.calendar-day` declares `border` twice (`styles.css:75, 78`).
 - [ ] **Unused selector** — `.calendar-container::-webkit-scrollbar` (`styles.css:43`) targets a class that is not used in the markup.
-- [ ] **`isDateSelectedBoundary` exported but unused** — `calendarUtils.js:43` is dead code.
-- [ ] **`checkExceedsLimit` duplicates `getDaysInWindow`** — `calendarUtils.js:56-74` reimplements the same loop just to compare against 90; replace with `getDaysInWindow(...) > 90`.
-- [ ] **`splitRange` is a closure inside `handleDayClick`** — `app.js:261` would be clearer as a top-level function taking the range and date.
+- [x] **`isDateSelectedBoundary` exported but unused** — `calendarUtils.js:43` is dead code.
+- [x] **`checkExceedsLimit` duplicates `getDaysInWindow`** — `calendarUtils.js:56-74` reimplements the same loop just to compare against 90; replace with `getDaysInWindow(...) > 90`.
+- [x] **`splitRange` is a closure inside `handleDayClick`** — `app.js:261` would be clearer as a top-level function taking the range and date.
 - [x] **Empty SW registration callbacks** — `index.html:75-79` swallow errors silently. Log failures.
 - [ ] **Manifest missing fields** — Add `id`, `scope`, `lang`, `categories`, and a maskable icon (`purpose: "any maskable"`) for better PWA install behavior on Android.
 - [ ] **No `.gitignore` entries for OS/editor cruft** — Verify `.DS_Store`, `node_modules/`, etc. are ignored if any tooling is added.
-- [ ] **No tests** — At minimum add unit tests for `calendarUtils.getDaysInWindow` (boundary cases, DST, overlapping ranges, empty input).
+- [x] **No tests** — At minimum add unit tests for `calendarUtils.getDaysInWindow` (boundary cases, DST, overlapping ranges, empty input).
 - [ ] **No linter / formatter** — Adopt ESLint + Prettier to catch the issues above earlier.
 - [ ] **README has no run/deploy instructions** — Add how to serve locally (e.g. `python -m http.server`) and how the PWA is deployed.
 - [ ] **No license file** — Add a LICENSE (MIT/Apache-2.0/etc.) so the "View code on GitHub" link is meaningful for forkers.
