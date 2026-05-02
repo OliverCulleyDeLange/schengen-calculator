@@ -1,6 +1,6 @@
 import * as calendarUtils from './calendarUtils.js';
 import * as db from './db.js';
-import { dateToYmd, ymdToDate } from './dateStorage.js';
+import { dateToYmd, parseImportPayload } from './dateStorage.js';
 
 let dateRanges = [];
 let calendarHasScrolled = false;
@@ -43,22 +43,7 @@ function setupEventListeners() {
             if (!file) return;
             try {
                 const text = await file.text();
-                const imported = JSON.parse(text);
-                if (!Array.isArray(imported)) throw new Error('Invalid file format');
-                const sanitized = imported.map((r, idx) => {
-                    if (!r || typeof r !== 'object') {
-                        throw new Error(`Item ${idx} is not an object`);
-                    }
-                    let start, end;
-                    try { start = ymdToDate(r.start); }
-                    catch (e) { throw new Error(`Item ${idx} has invalid start: ${r.start}`); }
-                    try { end = ymdToDate(r.end); }
-                    catch (e) { throw new Error(`Item ${idx} has invalid end: ${r.end}`); }
-                    if (start > end) {
-                        throw new Error(`Item ${idx} has start after end`);
-                    }
-                    return { start, end };
-                });
+                const sanitized = parseImportPayload(JSON.parse(text));
                 await db.clearAllRanges();
                 for (const r of sanitized) {
                     await db.saveDateRange(r.start, r.end);

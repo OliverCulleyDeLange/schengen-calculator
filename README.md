@@ -26,7 +26,7 @@ A comprehensive review of the codebase as of 2026-05-02. Items are grouped by se
 - [ ] **Service worker never invalidates on deploy** — `service-worker.js:1` uses a static `schengen-calculator-v1` cache name. JS/CSS edits won't reach users until the constant is bumped. Either bump the version on every release (build step) or use stale-while-revalidate for assets.
 - [ ] **Privacy page broken offline** — `service-worker.js:2-12` does not precache `/privacy/index.html`, so the linked privacy policy 404s offline.
 - [ ] **No navigation fallback in SW** — Cache-first match without `event.request.mode === 'navigate'` fallback to `/index.html` will fail for direct deep links offline.
-- [ ] **Import does not validate item shape** — `app.js:51-58` only checks `Array.isArray(imported)` and then trusts each item's `.start`/`.end`. Malformed input produces `Invalid Date` rows that poison IndexedDB.
+- [x] **Import does not validate item shape** — `app.js:51-58` only checks `Array.isArray(imported)` and then trusts each item's `.start`/`.end`. Malformed input produces `Invalid Date` rows that poison IndexedDB.
 - [x] **No IndexedDB schema versioning strategy** — `db.js:2` is `DB_VERSION = 1` with no migration path. Any future schema change will silently corrupt existing user data.
 
 ### High (UX / accessibility)

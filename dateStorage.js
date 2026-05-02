@@ -38,6 +38,29 @@ export function ymdToDate(value) {
     throw new Error('Unrecognised date string: ' + value);
 }
 
+// Validates a parsed JSON import payload and returns sanitized
+// {start, end} Date pairs. Throws with an indexed message on the first
+// malformed item so the caller can surface a useful error.
+export function parseImportPayload(input) {
+    if (!Array.isArray(input)) {
+        throw new Error('Import file must contain a JSON array of ranges');
+    }
+    return input.map((r, idx) => {
+        if (!r || typeof r !== 'object') {
+            throw new Error(`Item ${idx} is not an object`);
+        }
+        let start, end;
+        try { start = ymdToDate(r.start); }
+        catch (e) { throw new Error(`Item ${idx} has invalid start: ${JSON.stringify(r.start)}`); }
+        try { end = ymdToDate(r.end); }
+        catch (e) { throw new Error(`Item ${idx} has invalid end: ${JSON.stringify(r.end)}`); }
+        if (start > end) {
+            throw new Error(`Item ${idx} has start after end`);
+        }
+        return { start, end };
+    });
+}
+
 export function isValidYmd(value) {
     if (typeof value !== 'string') return false;
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
